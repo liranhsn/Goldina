@@ -9,8 +9,7 @@
     "build": "electron-vite build && electron-builder",
     "build:mac": "electron-builder --mac",
     "build:win": "electron-builder --win",
-    "test": "vitest run",
-    "postinstall": "PYTHON=/opt/homebrew/opt/python@3.11/bin/python3 electron-builder install-app-deps"
+    "test": "vitest run"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

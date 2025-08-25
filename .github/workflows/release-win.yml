@@ -1,16 +1,16 @@
+# .github/workflows/release-win.yml
 name: release-windows
 
 on:
   push:
-    tags:
-      - "v*.*.*" # e.g. v0.1.0
+    tags: ["v*.*.*"]
   workflow_dispatch:
 
 jobs:
   release:
     runs-on: windows-latest
     permissions:
-      contents: write # needed to create/upload release assets
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -22,11 +22,10 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install deps
+      - name: Install deps (clean)
         run: npm ci
 
-      - name: Rebuild better-sqlite3 for Electron
-        run: npx electron-rebuild -f --only better-sqlite3
+      # postinstall runs our cross-platform script and rebuilds native deps for Electron
 
       - name: Build Windows installer
         run: npm run build:win
