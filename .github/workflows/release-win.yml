@@ -1,0 +1,42 @@
+name: release-windows
+
+on:
+  push:
+    tags:
+      - "v*.*.*" # e.g. v0.1.0
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: windows-latest
+    permissions:
+      contents: write # needed to create/upload release assets
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.19.0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Rebuild better-sqlite3 for Electron
+        run: npx electron-rebuild -f --only better-sqlite3
+
+      - name: Build Windows installer
+        run: npm run build:win
+
+      - name: Create GitHub Release and upload assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/**/*.exe
+            dist/**/*.zip
+            dist/**/*.yml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
