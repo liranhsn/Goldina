@@ -5,11 +5,10 @@
   "type": "module",
   "main": "dist-electron/main/index.js",
   "scripts": {
+    "postinstall": "node scripts/install-app-deps.js",
     "dev": "electron-vite dev",
     "build": "electron-vite build",
-    "build:mac": "electron-builder --mac",
-    "build:win": "npm run build && electron-builder --win",
-    "test": "vitest run"
+    "build:win": "electron-builder --win"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
@@ -31,23 +30,22 @@
     "vitest": "^1.6.0"
   },
   "build": {
-    "appId": "com.example.inventory",
+    "appId": "com.yourcompany.goldina",
+    "productName": "Goldina",
     "files": [
       "dist/**",
       "dist-electron/**",
-      "electron/**/index.js",
       "package.json"
     ],
     "asarUnpack": [
       "node_modules/better-sqlite3/**/*"
     ],
-    "mac": {
-      "category": "public.app-category.productivity"
-    },
+    "publish": "never",
     "win": {
       "target": [
         "nsis"
-      ]
+      ],
+      "artifactName": "Goldina-Setup-${version}.exe"
     }
   }
 }
