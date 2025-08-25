@@ -1,0 +1,72 @@
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  margin: 0;
+}
+.page {
+  padding: 16px;
+}
+.grid3 {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, 1fr);
+  max-width: 680px;
+}
+.big {
+  font-size: 22px;
+  padding: 24px;
+}
+.row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.card {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 12px;
+  min-width: 260px;
+  background: #fff;
+}
+.table {
+  border-collapse: collapse;
+  width: 100%;
+  max-width: 1200px;
+}
+.table th,
+.table td {
+  border: 1px solid #e5e5e5;
+  padding: 8px;
+  text-align: left;
+}
+.pos {
+  color: #0a7a0a;
+}
+.neg {
+  color: #b11;
+}
+.balance {
+  margin: 8px 0 16px;
+}
+input,
+select,
+button {
+  padding: 8px;
+  margin: 4px 0;
+}
+button {
+  cursor: pointer;
+}
+.error {
+  background: #ffe5e5;
+  color: #900;
+  padding: 8px;
+  border: 1px solid #f3c;
+  margin: 8px 0;
+}
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: grid;
+  place-items: center;
+}
