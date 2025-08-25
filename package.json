@@ -40,7 +40,6 @@
     "asarUnpack": [
       "node_modules/better-sqlite3/**/*"
     ],
-    "publish": "never",
     "win": {
       "target": [
         "nsis"
