@@ -6,9 +6,9 @@
   "main": "dist-electron/main/index.js",
   "scripts": {
     "dev": "electron-vite dev",
-    "build": "electron-vite build && electron-builder",
+    "build": "electron-vite build",
     "build:mac": "electron-builder --mac",
-    "build:win": "electron-builder --win",
+    "build:win": "npm run build && electron-builder --win",
     "test": "vitest run"
   },
   "dependencies": {
