@@ -1,9 +1,7 @@
-import React from "react";
-
 export default function Menu({ onNavigate }: { onNavigate: (r: any) => void }) {
   return (
     <div className="page">
-      <h1>Inventory</h1>
+      <h1 className="whiteText">Inventory</h1>
       <div className="grid3">
         <button
           className="big"

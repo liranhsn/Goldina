@@ -3,7 +3,13 @@ body {
   margin: 0;
 }
 .page {
+  width: 100vw;
+  height: 100vh;
   padding: 16px;
+  background-image: url("../assets/images/logo.png");
+  background-color: black;
+  background-repeat: no-repeat;
+  background-size: contain;
 }
 .grid3 {
   display: grid;
@@ -69,4 +75,8 @@ button {
   background: rgba(0, 0, 0, 0.35);
   display: grid;
   place-items: center;
+}
+
+.whiteText {
+  color: white;
 }

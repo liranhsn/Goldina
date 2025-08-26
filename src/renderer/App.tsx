@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Menu from "./views/Menu";
 import MetalView from "./views/MetalView";
 import AccessoriesView from "./views/AccessoriesView";

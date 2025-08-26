@@ -15,8 +15,17 @@ async function createWindow() {
       nodeIntegration: false,
     },
   });
-  if (!app.isPackaged) await win.loadURL(process.env.ELECTRON_RENDERER_URL!);
-  else await win.loadFile(path.join(__dirname, "../../dist/index.html"));
+  if (!app.isPackaged) {
+    await win.loadURL(process.env.ELECTRON_RENDERER_URL!);
+    win.webContents.openDevTools({ mode: "detach" });
+  } else {
+    const indexHtml = path.join(__dirname, "../../dist/renderer/index.html");
+    await win.loadFile(indexHtml);
+  }
+
+  win.webContents.on("did-fail-load", (_e, code, desc, url) => {
+    console.error("did-fail-load:", code, desc, url);
+  });
 }
 
 app.whenReady().then(createWindow);
@@ -26,6 +35,7 @@ ipcMain.handle("ping", async () => "pong");
 ipcMain.handle("metal:get-dashboard", (_e, metal: Metal) =>
   db.getMetalDashboard(metal)
 );
+
 ipcMain.handle(
   "metal:add",
   (_e, payload: { metal: Metal; grams: number; note?: string }) => {
@@ -33,6 +43,7 @@ ipcMain.handle(
     return db.getMetalDashboard(payload.metal);
   }
 );
+
 ipcMain.handle(
   "metal:sell",
   (_e, payload: { metal: Metal; grams: number; note?: string }) => {
