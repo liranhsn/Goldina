@@ -18,7 +18,7 @@ async function createWindow() {
   });
   if (!app.isPackaged) {
     await win.loadURL(process.env.ELECTRON_RENDERER_URL!);
-    win.webContents.openDevTools({ mode: "detach" });
+    // win.webContents.openDevTools({ mode: "detach" });
   } else {
     const indexHtml = path.join(__dirname, "../../dist/renderer/index.html");
     await win.loadFile(indexHtml);
