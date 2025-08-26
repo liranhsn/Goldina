@@ -1,18 +1,17 @@
-import React, { useEffect, useState } from "react";
-import { Accessory, AccFilter } from "../../types";
+import { useEffect, useState } from "react";
+import { AccFilter } from "../../types";
 import { Modal } from "../components/Modal";
 import { Field } from "../components/Field";
+import { AccessoryItem } from "../../../electron/main/types";
 
 export default function AccessoriesView() {
   const [filter, setFilter] = useState<AccFilter>("available");
-  const [items, setItems] = useState<Accessory[]>([]);
+  const [items, setItems] = useState<AccessoryItem[]>([]);
   const [addOpen, setAddOpen] = useState(false);
-  const [sellOpen, setSellOpen] = useState<Accessory | null>(null);
+  const [sellOpen, setSellOpen] = useState<AccessoryItem | null>(null);
 
   async function load() {
-    const result = await window.api.listAccessories(filter);
-    setItems(result);
-    console.log(items);
+    setItems(await window.api.listAccessories(filter));
   }
   useEffect(() => {
     load();
@@ -69,21 +68,21 @@ export default function AccessoriesView() {
             </thead>
             <tbody>
               {items.map((it) => (
-                <tr key={it.Id}>
-                  <td>{it.Type}</td>
-                  <td>{it.Description}</td>
-                  <td>{it.Price?.toFixed(2)}</td>
-                  <td>{new Date(it.AddedAt).toLocaleString("he-IL")}</td>
+                <tr key={it.id}>
+                  <td>{it.type}</td>
+                  <td>{it.description}</td>
+                  <td>{it.price?.toFixed(2)}</td>
+                  <td>{new Date(it.addedAt).toLocaleString("he-IL")}</td>
                   <td>
-                    {it.SoldAt
-                      ? new Date(it.SoldAt).toLocaleString("he-IL")
+                    {it.soldAt
+                      ? new Date(it.soldAt).toLocaleString("he-IL")
                       : "-"}
                   </td>
                   <td>
-                    {it.SoldPrice != null ? it.SoldPrice?.toFixed(2) : "-"}
+                    {it.soldPrice != null ? it.soldPrice?.toFixed(2) : "-"}
                   </td>
                   <td>
-                    {!it.SoldAt && (
+                    {!it.soldAt && (
                       <button className="btn" onClick={() => setSellOpen(it)}>
                         מכירה
                       </button>
@@ -208,19 +207,19 @@ function SellAccessoryModal({
   onClose,
   afterSell,
 }: {
-  item: Accessory | null;
+  item: AccessoryItem | null;
   onClose: () => void;
   afterSell: () => void;
 }) {
   const [soldPrice, setSoldPrice] = useState("");
   useEffect(() => {
-    setSoldPrice(item?.Price?.toString() ?? "");
-  }, [item?.Id]);
+    setSoldPrice(item?.price?.toString() ?? "");
+  }, [item?.id]);
 
   if (!item) return null;
   return (
     <Modal
-      title={`מכירת פריט: ${item.Type}`}
+      title={`מכירת פריט: ${item.type}`}
       open={!!item}
       onClose={onClose}
       footer={
@@ -234,7 +233,7 @@ function SellAccessoryModal({
               const p = soldPrice ? Number(soldPrice) : undefined;
               if (p != null && (isNaN(p) || p < 0))
                 return alert("מחיר מכירה חייב להיות ≥ 0");
-              await window.api.sellAccessory(item.Id, p);
+              await window.api.sellAccessory(item.id, p);
               onClose();
               afterSell();
             }}
@@ -244,14 +243,14 @@ function SellAccessoryModal({
         </>
       }
     >
-      <div className="tag">מחיר מקורי: {item.Price?.toFixed(2)}</div>
+      <div className="tag">מחיר מקורי: {item.price?.toFixed(2)}</div>
       <Field label="מחיר מכירה (אופציונלי)">
         <input
           className="number"
           inputMode="decimal"
           value={soldPrice}
           onChange={(e) => setSoldPrice(e.target.value)}
-          placeholder={`${item.Price?.toFixed(2)}`}
+          placeholder={`${item.price?.toFixed(2)}`}
         />
       </Field>
     </Modal>

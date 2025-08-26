@@ -5,6 +5,8 @@ export interface MetalDashboard {
 }
 export type AccessoryFilter = "available" | "sold" | "all";
 
+export type CheckStatus = "issued" | "deposited" | "returned" | "cancelled";
+
 export interface AccessoryItem {
   id: string;
   type: string;
@@ -15,3 +17,10 @@ export interface AccessoryItem {
   soldPrice?: number | null;
   sku?: string | null;
 }
+
+export type FixedExpense = {
+  id: string;
+  name: string;
+  price: number;
+  createdAt: string; // ISO
+};

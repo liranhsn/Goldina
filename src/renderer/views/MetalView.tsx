@@ -112,6 +112,7 @@ export default function MetalView({ metal }: { metal: Metal }) {
               <tr>
                 <th>תאריך</th>
                 <th>גרמים</th>
+                <th>מחיר</th>
                 <th>הערה</th>
                 <th>פעולות</th>
               </tr>
@@ -126,6 +127,7 @@ export default function MetalView({ metal }: { metal: Metal }) {
                     {tx.deltaGrams >= 0 ? "+" : ""}
                     {tx.deltaGrams?.toFixed(3)} גרם
                   </td>
+                  <td>{tx.price}</td>
                   <td>{tx.note ?? "-"}</td>
                   <td>
                     <button
@@ -206,6 +208,7 @@ function AddSellModals({
 }) {
   const metalLabel = METAL_LABEL[metal];
   const [addGrams, setAddGrams] = useState<string>("");
+  const [addPrice, setAddPrice] = useState<string>("");
   const [addNote, setAddNote] = useState("");
   const [sellGrams, setSellGrams] = useState<string>("");
   const [sellNote, setSellNote] = useState("");
@@ -225,11 +228,18 @@ function AddSellModals({
               className="btn gold"
               onClick={async () => {
                 const grams = Number(addGrams);
+                const price = Number(addPrice);
                 if (!grams || grams <= 0)
                   return alert("אנא הזן כמות גרמים גדולה מ־0");
-                await window.api.addMetal(metal, grams, addNote || undefined);
+                await window.api.addMetal(
+                  metal,
+                  grams,
+                  price,
+                  addNote || undefined
+                );
                 onCloseAdd();
                 setAddGrams("");
+                setAddPrice("");
                 setAddNote("");
                 afterChange();
               }}
@@ -246,6 +256,15 @@ function AddSellModals({
             value={addGrams}
             onChange={(e) => setAddGrams(e.target.value)}
             placeholder="לדוגמה 12.345"
+          />
+        </Field>
+        <Field label="מחיר">
+          <input
+            className="number"
+            inputMode="decimal"
+            value={addPrice}
+            onChange={(e) => setAddPrice(e.target.value)}
+            placeholder="הכנס מחיר"
           />
         </Field>
         <Field label="הערה (אופציונלי)">
@@ -271,13 +290,20 @@ function AddSellModals({
               className="btn gold"
               onClick={async () => {
                 const grams = Number(sellGrams);
+                const price = Number(addPrice);
                 if (!grams || grams <= 0)
                   return alert("אנא הזן כמות גרמים גדולה מ־0");
                 if (grams > currentBalance)
                   return alert("לא ניתן למכור יותר מהיתרה הקיימת.");
-                await window.api.sellMetal(metal, grams, sellNote || undefined);
+                await window.api.sellMetal(
+                  metal,
+                  grams,
+                  price,
+                  sellNote || undefined
+                );
                 onCloseSell();
                 setSellGrams("");
+                setAddPrice("");
                 setSellNote("");
                 afterChange();
               }}
@@ -295,6 +321,15 @@ function AddSellModals({
             value={sellGrams}
             onChange={(e) => setSellGrams(e.target.value)}
             placeholder="לדוגמה 1.250"
+          />
+        </Field>
+        <Field label="מחיר">
+          <input
+            className="number"
+            inputMode="decimal"
+            value={addPrice}
+            onChange={(e) => setAddPrice(e.target.value)}
+            placeholder="הכנס מחיר"
           />
         </Field>
         <Field label="הערה (אופציונלי)">

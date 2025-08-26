@@ -410,3 +410,95 @@ html[dir="rtl"] .table tbody td {
   gap: 8px;
   flex-wrap: wrap;
 }
+
+/* status tags */
+.tag.issued {
+  background: #1f2732;
+  border-color: #2b394d;
+}
+.tag.deposited {
+  background: #1c2e1f;
+  border-color: #2a4b31;
+}
+.tag.returned {
+  background: #3a1e1e;
+  border-color: #5a2b2b;
+}
+.tag.cancelled {
+  background: #2f2f2f;
+  border-color: #474747;
+}
+
+/* --- Dashboard grid --- */
+.dash-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+/* --- KPI card --- */
+.kpi.card {
+  padding: 14px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 215, 0, 0.06),
+    rgba(0, 0, 0, 0)
+  );
+  border: 1px solid rgba(255, 215, 0, 0.18);
+}
+.kpi-title {
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+.kpi-value {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+/* --- Mini list of transactions --- */
+.mini-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.mini-row {
+  display: grid;
+  grid-template-columns: 120px 1fr 2fr;
+  align-items: center;
+  gap: 8px;
+}
+.mini-row .muted {
+  color: var(--muted);
+  font-size: 12px;
+}
+.mini-row .grow {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Delta colors reuse שלכם (אם יש); אחרת: */
+.delta.plus {
+  color: #21d07a;
+  font-weight: 600;
+}
+.delta.minus {
+  color: #ff6b6b;
+  font-weight: 600;
+}
+
+/* תגיות/צ׳יפים */
+.chip {
+  border: 1px solid rgba(255, 215, 0, 0.25);
+  background: rgba(255, 215, 0, 0.06);
+  color: #f5d67b;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+.content > .card + .card,
+.dash > .card + .card {
+  margin-block-start: 16px; /* לוגי, עובד גם ב-RTL */
+}
