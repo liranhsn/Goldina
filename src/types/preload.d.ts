@@ -4,7 +4,7 @@ type Metal = "gold" | "silver";
 type AccessoryFilter = "available" | "sold" | "all";
 
 interface DashboardDto {
-  balanceGrams: number;
+  totalGrams: number;
   recent: Array<{ at: string; deltaGrams: number; note?: string }>;
   totalGrams: number;
 }
@@ -24,7 +24,11 @@ declare global {
   interface Window {
     api: {
       ping(): Promise<string>;
-      getMetalDashboard(metal: Metal): Promise<MetalDashboard>;
+      getMetalDashboard(
+        metal: Metal,
+        fromISO: string | undefined,
+        toISO: string | undefined
+      ): Promise<MetalDashboard>;
       addMetal(
         metal: Metal,
         grams: number,
@@ -35,6 +39,7 @@ declare global {
         grams: number,
         note?: string
       ): Promise<DashboardDto>;
+      deleteMetalTx(id: string, metal: Metal): Promise<MetalDashboard>;
       listAccessories(filter: AccessoryFilter): Promise<AccessoryItem[]>;
       addAccessory(item: {
         type: string;

@@ -14,6 +14,7 @@ async function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
     },
+    autoHideMenuBar: true,
   });
   if (!app.isPackaged) {
     await win.loadURL(process.env.ELECTRON_RENDERER_URL!);
@@ -32,8 +33,14 @@ app.whenReady().then(createWindow);
 
 ipcMain.handle("ping", async () => "pong");
 
-ipcMain.handle("metal:get-dashboard", (_e, metal: Metal) =>
-  db.getMetalDashboard(metal)
+// ipcMain.handle("metal:get-dashboard", (_e, metal: Metal) =>
+//   db.getMetalDashboard(metal)
+// );
+
+ipcMain.handle(
+  "metal:get-dashboard",
+  (_e, payload: { metal: Metal; fromISO?: string; toISO?: string }) =>
+    db.getMetalDashboard(payload.metal, payload.fromISO, payload.toISO)
 );
 
 ipcMain.handle(
@@ -48,6 +55,14 @@ ipcMain.handle(
   "metal:sell",
   (_e, payload: { metal: Metal; grams: number; note?: string }) => {
     db.sellMetalGrams(payload.metal, payload.grams, payload.note);
+    return db.getMetalDashboard(payload.metal);
+  }
+);
+
+ipcMain.handle(
+  "metal:delete-tx",
+  (_e, payload: { id: string; metal: "gold" | "silver" }) => {
+    db.deleteMetalTransaction(payload.id, payload.metal);
     return db.getMetalDashboard(payload.metal);
   }
 );

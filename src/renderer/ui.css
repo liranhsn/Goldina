@@ -26,12 +26,7 @@ body,
 }
 body {
   margin: 0;
-  background: radial-gradient(
-      1200px 800px at 70% -10%,
-      rgba(212, 175, 55, 0.08),
-      transparent 60%
-    ),
-    var(--bg);
+  background-color: black;
   color: var(--text);
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
   -webkit-font-smoothing: antialiased;
@@ -45,7 +40,7 @@ body {
   min-height: 100%;
 }
 .sidebar {
-  background: linear-gradient(180deg, #0f1016, #0b0b0e 60%);
+  background-color: #0f1016;
   border-right: 1px solid var(--border);
   padding: 20px 16px;
   display: flex;
@@ -53,10 +48,11 @@ body {
   gap: 16px;
 }
 .brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  height: 70px;
   padding: 8px 10px;
+  background-image: url("../assets/images/logo.png");
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 .badge {
   width: 36px;
@@ -239,7 +235,7 @@ body {
 }
 .table th {
   color: var(--muted);
-  text-align: left;
+  text-align: right;
   font-weight: 500;
 }
 .table tr:hover td {
@@ -326,4 +322,91 @@ select:focus-visible {
 }
 *::-webkit-scrollbar-thumb:hover {
   background: #2d3144;
+}
+
+/* ===== Date Range Pill (RTL friendly) ===== */
+.header-actions {
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.range-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(180deg, #0e0f13 0%, #13151a 100%);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 10px;
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.range-pill .label {
+  font-size: 12px;
+  color: var(--muted);
+  padding-inline: 6px;
+}
+
+.range-pill .date {
+  background: transparent;
+  border: 0;
+  color: var(--text);
+  padding: 6px 8px;
+  min-width: 10ch;
+  text-align: center;
+  border-radius: 8px;
+  outline: none;
+}
+
+.range-pill .date:focus {
+  outline: 2px solid rgba(255, 215, 0, 0.25);
+}
+
+.range-pill .dash {
+  opacity: 0.5;
+}
+
+.range-pill .sep {
+  width: 1px;
+  height: 18px;
+  background: var(--line);
+  margin-inline: 2px;
+}
+
+.range-pill .chip {
+  background: radial-gradient(120% 120% at 50% 0%, #1b1e25 0%, #171a20 100%);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  transition: transform 0.1s ease, border-color 0.2s ease;
+}
+
+.range-pill .chip:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 215, 0, 0.35);
+}
+
+/* בקר כרום לתאריך */
+.range-pill .date::-webkit-calendar-picker-indicator {
+  filter: invert(1) opacity(0.9);
+}
+
+/* ב-RTL שמור את הכיתוב ימינה והמספרים של התאריך שמאלה */
+html[dir="rtl"] .range-pill .label {
+  text-align: right;
+}
+html[dir="rtl"] .table thead th,
+html[dir="rtl"] .table tbody td {
+  text-align: right;
+}
+
+/* actions wrap */
+.actions {
+  display: inline-flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }

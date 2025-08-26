@@ -6,9 +6,7 @@ declare global {
       // ping
       ping: () => Promise<string>;
       // metals
-      getMetalDashboard: (
-        metal: "gold" | "silver"
-      ) => Promise<{
+      getMetalDashboard: (metal: "gold" | "silver") => Promise<{
         totalGrams: number;
         recent: { id: string; at: string; deltaGrams: number; note?: string }[];
       }>;
@@ -23,7 +21,9 @@ declare global {
         note?: string
       ) => Promise<void>;
       // accessories
-      listAccessories: (filter: "available" | "sold" | "all") => Promise<any[]>;
+      listAccessories: (
+        filter: "available" | "sold" | "all"
+      ) => Promise<Accessory[]>;
       addAccessory: (item: {
         type: string;
         description: string;

@@ -73,30 +73,61 @@ export class Db {
     }
   }
 
-  getMetalDashboard(metal: Metal): MetalDashboard {
-    const mt = toMetalTypeInt(metal);
-    const row = this.db
-      .prepare("SELECT TotalGrams FROM MetalBalance WHERE MetalType = ?")
-      .get(mt);
-    const balanceGrams = row ? (row.TotalGrams as number) : 0;
-    const recent = this.db
+  getMetalDashboard(metal: Metal, fromISO?: string, toISO?: string) {
+    const metalInt = metal === "gold" ? 1 : 2;
+    const totalRow = this.db
       .prepare(
-        `
-      SELECT At, DeltaGrams, Note
-      FROM MetalTransaction
-      WHERE MetalType = ?
-      ORDER BY At DESC
-      LIMIT 20
-    `
+        "SELECT TotalGrams as total FROM MetalBalance WHERE MetalType = ?"
       )
-      .all(mt)
-      .map((r: any) => ({
-        at: r.At as string,
-        deltaGrams: r.DeltaGrams as number,
-        note: r.Note as string | undefined,
-      }));
-    return { balanceGrams, recent };
+      .get(metalInt);
+    const totalGrams = totalRow?.total ?? 0;
+
+    let sql = `
+    SELECT Id as id, At as at, DeltaGrams as deltaGrams, Note as note
+    FROM MetalTransaction
+    WHERE MetalType = ?
+  `;
+    const params: any[] = [metalInt];
+
+    if (fromISO) {
+      sql += " AND At >= ?";
+      params.push(fromISO);
+    }
+    if (toISO) {
+      sql += " AND At < ?";
+      params.push(toISO);
+    }
+
+    sql += " ORDER BY At DESC LIMIT 200"; // אפשר להתאים
+
+    const recent = this.db.prepare(sql).all(...params);
+    return { totalGrams, recent };
   }
+
+  // getMetalDashboard(metal: Metal): MetalDashboard {
+  //   const mt = toMetalTypeInt(metal);
+  //   const row = this.db
+  //     .prepare("SELECT TotalGrams FROM MetalBalance WHERE MetalType = ?")
+  //     .get(mt);
+  //   const balanceGrams = row ? (row.TotalGrams as number) : 0;
+  //   const recent = this.db
+  //     .prepare(
+  //       `
+  //     SELECT At, DeltaGrams, Note
+  //     FROM MetalTransaction
+  //     WHERE MetalType = ?
+  //     ORDER BY At DESC
+  //     LIMIT 20
+  //   `
+  //     )
+  //     .all(mt)
+  //     .map((r: any) => ({
+  //       at: r.At as string,
+  //       deltaGrams: r.DeltaGrams as number,
+  //       note: r.Note as string | undefined,
+  //     }));
+  //   return { balanceGrams, recent };
+  // }
 
   addMetalGrams(metal: Metal, grams: number, note?: string) {
     ensurePositiveGrams(grams);
@@ -139,6 +170,38 @@ export class Db {
         .run(crypto.randomUUID(), mt, -grams, note ?? null, now);
     });
     trx();
+  }
+
+  deleteMetalTransaction(id: string, metal: Metal) {
+    const metalInt = toMetalTypeInt(metal);
+
+    const txRow = this.db
+      .prepare(
+        "SELECT MetalType, DeltaGrams FROM MetalTransaction WHERE Id = ?"
+      )
+      .get(id);
+
+    if (!txRow) throw new Error("העסקה לא נמצאה");
+    if (txRow.MetalType !== metalInt) throw new Error("סוג מתכת לא תואם");
+
+    const balRow = this.db
+      .prepare("SELECT TotalGrams FROM MetalBalance WHERE MetalType = ?")
+      .get(metalInt);
+    const current = balRow?.TotalGrams ?? 0;
+
+    const newTotal = current - txRow.DeltaGrams; // מסירים את ההשפעה הקודמת
+    if (newTotal < -1e-9) {
+      throw new Error("מחיקה תגרום ליתרה שלילית. הפעולה נמנעה.");
+    }
+
+    const run = this.db.transaction(() => {
+      this.db
+        .prepare("UPDATE MetalBalance SET TotalGrams = ? WHERE MetalType = ?")
+        .run(newTotal, metalInt);
+      this.db.prepare("DELETE FROM MetalTransaction WHERE Id = ?").run(id);
+    });
+
+    run();
   }
 
   listAccessories(filter: AccessoryFilter): AccessoryItem[] {
