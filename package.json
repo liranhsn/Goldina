@@ -43,7 +43,7 @@
       "node_modules/better-sqlite3/**/*"
     ],
     "win": {
-      "icon": "build/icons/logo.ico",
+      "icon": "build/logo.ico",
       "target": [
         "nsis"
       ],
@@ -52,17 +52,17 @@
     "nsis": {
       "oneClick": true,
       "artifactName": "Goldina-Setup-${version}.exe",
-      "installerIcon": "build/icons/logo.ico",
-      "uninstallerIcon": "build/icons/logo.ico",
-      "installerHeaderIcon": "build/icons/logo.ico"
+      "installerIcon": "build/logo.ico",
+      "uninstallerIcon": "build/logo.ico",
+      "installerHeaderIcon": "build/logo.ico"
     },
     "extraResources": [
       {
-        "from": "build/icons/logo.ico",
+        "from": "build/logo.ico",
         "to": "logo.ico"
       },
       {
-        "from": "build/icons/logo.png",
+        "from": "build/logo.png",
         "to": "logo.png"
       }
     ]
