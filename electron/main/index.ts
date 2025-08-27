@@ -5,10 +5,17 @@ import type { Metal, AccessoryFilter } from "./types.js";
 
 let win: BrowserWindow;
 
+function iconPath() {
+  return app.isPackaged
+    ? path.join(process.resourcesPath, "logo.ico")
+    : path.join(process.cwd(), "build", "icons", "logo.ico");
+}
+
 async function createWindow() {
   win = new BrowserWindow({
     width: 1400,
     height: 800,
+    icon: iconPath(),
     webPreferences: {
       preload: path.join(__dirname, "../preload/index.js"),
       contextIsolation: true,

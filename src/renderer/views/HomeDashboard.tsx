@@ -205,7 +205,7 @@ export default function HomeDashboard({
               value={fromYMD}
               onChange={(e) => setFromYMD(e.target.value)}
             />
-            <span>→</span>
+            <span> - </span>
             <input
               className="input"
               type="date"
@@ -258,7 +258,7 @@ export default function HomeDashboard({
       {/* כרטיסים עם פירוט קצר */}
       <section className="card">
         <div className="card-h hstack">
-          <div>תנועות אחרונות—זהב</div>
+          <div>תנועות אחרונות - זהב</div>
           <button className="btn ghost" onClick={() => onNavigate("gold")}>
             למסך זהב
           </button>
@@ -270,7 +270,7 @@ export default function HomeDashboard({
 
       <section className="card">
         <div className="card-h hstack">
-          <div>תנועות אחרונות—כסף</div>
+          <div>תנועות אחרונות - כסף</div>
           <button className="btn ghost" onClick={() => onNavigate("silver")}>
             למסך כסף
           </button>
@@ -309,7 +309,10 @@ export default function HomeDashboard({
                     <td style={{ textAlign: "right" }}>
                       {formatILS(c.amount)}
                     </td>
-                    <td style={{ textAlign: "right" }}>{c.dueDate}</td>
+
+                    <td style={{ textAlign: "right" }}>
+                      {new Date(c.dueDate).toLocaleString("he-IL")}
+                    </td>
                     <td style={{ textAlign: "right" }}>
                       {statusLabel(c.status)}
                     </td>
