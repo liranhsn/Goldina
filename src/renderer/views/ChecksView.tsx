@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Field } from "../components/Field";
 import { Modal } from "../components/Modal";
+import { formatILS } from "../utils/utils";
 
 type Status = "issued" | "deposited" | "returned" | "cancelled" | "all";
 type CheckItem = {
@@ -22,6 +23,7 @@ export default function ChecksView() {
   const [items, setItems] = useState<CheckItem[]>([]);
   const [search, setSearch] = useState("");
   const [openAdd, setOpenAdd] = useState(false);
+  const [total, setTotal] = useState(0);
 
   // טווח תאריכים – ברירת מחדל: החודש הנוכחי
   const init = useMemo(() => {
@@ -44,6 +46,9 @@ export default function ChecksView() {
     });
 
     setItems(list);
+    setTotal(
+      list.reduce((sum: number, x: any) => sum + (Number(x.amount) || 0), 0)
+    );
   }
 
   useEffect(() => {
@@ -105,6 +110,12 @@ export default function ChecksView() {
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && load()}
           />
+          <span
+            className="btn gold"
+            style={{ marginInlineStart: 8, width: "180px" }}
+          >
+            סה״כ: {formatILS(total)}
+          </span>
         </div>
 
         <div className="hstack header-actions">

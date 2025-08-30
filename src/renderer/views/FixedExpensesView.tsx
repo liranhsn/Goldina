@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Modal } from "../components/Modal";
 import { Field } from "../components/Field";
+import { formatILS } from "../utils/utils";
 
 type Fx = { id: string; name: string; price: number; createdAt: string };
 
@@ -10,13 +11,6 @@ export default function FixedExpensesView() {
   const [addOpen, setAddOpen] = useState(false);
   const [editItem, setEditItem] = useState<Fx | null>(null);
   const [total, setTotal] = useState(0);
-
-  const formatILS = (n: number) =>
-    n.toLocaleString("he-IL", {
-      style: "currency",
-      currency: "ILS",
-      minimumFractionDigits: 2,
-    });
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();

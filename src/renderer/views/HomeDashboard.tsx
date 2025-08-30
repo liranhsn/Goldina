@@ -56,6 +56,7 @@ export default function HomeDashboard({
   const [accAvail, setAccAvail] = useState<Accessory[]>([]);
   const [accSold, setAccSold] = useState<Accessory[]>([]);
   const [checksIssued, setChecksIssued] = useState<CheckRow[]>([]);
+  const [totalCheckesIssued, setTottalChecksUssued] = useState(0);
   const [checksDeposited, setChecksDeposited] = useState<CheckRow[]>([]);
   const [checksReturned, setChecksReturned] = useState<CheckRow[]>([]);
   const [fx, setFx] = useState<Fx[]>([]);
@@ -121,6 +122,12 @@ export default function HomeDashboard({
     const in14 = new Date(Date.now() + 14 * 86400000)
       .toISOString()
       .slice(0, 10);
+    setTottalChecksUssued(
+      checksIssued.reduce(
+        (sum: number, x: any) => sum + (Number(x.amount) || 0),
+        0
+      )
+    );
     return checksIssued.filter((c) => c.dueDate >= today && c.dueDate <= in14)
       .length;
   }, [checksIssued]);
@@ -237,6 +244,11 @@ export default function HomeDashboard({
           title="מכירות אביזרים (₪)"
           value={formatILS(salesRevenueILS)}
           onClick={() => onNavigate("accessories")}
+        />
+        <KpiCard
+          title="ציקים פתוחים (סה״כ)"
+          value={formatILS(totalCheckesIssued)}
+          onClick={() => onNavigate("checks")}
         />
         <KpiCard
           title="צ׳קים—עומדים לפירעון (14 יום)"

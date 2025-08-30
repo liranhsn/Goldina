@@ -3,6 +3,8 @@ import path from "node:path";
 import { db } from "./db.js";
 import type { Metal, AccessoryFilter } from "./types.js";
 
+const ADMIN_PASSWORD = "2468";
+
 let win: BrowserWindow;
 
 function iconPath() {
@@ -149,3 +151,8 @@ ipcMain.handle(
     db.updateFixedExpense(p)
 );
 ipcMain.handle("fx:delete", (_e, id: string) => db.deleteFixedExpense(id));
+
+ipcMain.handle("admin:unlock", async (_e, password: string) => {
+  // super-basic compare; replace with stronger logic later if you want
+  return password === ADMIN_PASSWORD;
+});

@@ -61,4 +61,6 @@ contextBridge.exposeInMainWorld("api", {
   updateFixedExpense: (p: { id: string; name: string; price: number }) =>
     ipcRenderer.invoke("fx:update", p),
   deleteFixedExpense: (id: string) => ipcRenderer.invoke("fx:delete", id),
+  adminUnlock: (password: string) =>
+    ipcRenderer.invoke("admin:unlock", password),
 });

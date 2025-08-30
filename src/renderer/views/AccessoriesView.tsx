@@ -45,9 +45,6 @@ export default function AccessoriesView() {
           <button className="btn gold" onClick={() => setAddOpen(true)}>
             הוסף פריט
           </button>
-          <button className="btn ghost" onClick={load}>
-            רענון
-          </button>
         </div>
       </div>
 
@@ -60,6 +57,7 @@ export default function AccessoriesView() {
                 <th>סוג</th>
                 <th>תיאור</th>
                 <th>מחיר</th>
+                <th>קוד</th>
                 <th>נוסף בתאריך</th>
                 <th>נמכר בתאריך</th>
                 <th>מחיר מכירה</th>
@@ -72,6 +70,7 @@ export default function AccessoriesView() {
                   <td>{it.type}</td>
                   <td>{it.description}</td>
                   <td>{it.price?.toFixed(2)}</td>
+                  <td>{it.sku != null ? it.sku : "-"}</td>
                   <td>{new Date(it.addedAt).toLocaleString("he-IL")}</td>
                   <td>
                     {it.soldAt

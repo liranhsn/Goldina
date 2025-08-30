@@ -69,6 +69,7 @@ declare global {
         price: number;
       }) => Promise<any>;
       deleteFixedExpense: (id: string) => Promise<any>;
+      adminUnlock: (password: string) => Promise<boolean>;
     };
   }
 }
