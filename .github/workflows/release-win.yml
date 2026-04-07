@@ -12,6 +12,7 @@ jobs:
       contents: write # allow publishing to GitHub Releases
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # used by electron-builder to publish
+      UPDATE_TOKEN: ${{ secrets.UPDATE_TOKEN }} # read-only PAT baked into the app for auto-updates
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,4 +35,4 @@ jobs:
 
       # Package AND publish to the Release for this tag
       - name: Package & publish (electron-builder)
-        run: npm run build:win
+        run: npx electron-builder --win --publish always

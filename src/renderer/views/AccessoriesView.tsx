@@ -9,6 +9,7 @@ export default function AccessoriesView() {
   const [items, setItems] = useState<AccessoryItem[]>([]);
   const [addOpen, setAddOpen] = useState(false);
   const [sellOpen, setSellOpen] = useState<AccessoryItem | null>(null);
+  const [editItem, setEditItem] = useState<AccessoryItem | null>(null);
 
   async function load() {
     setItems(await window.api.listAccessories(filter));
@@ -80,7 +81,10 @@ export default function AccessoriesView() {
                   <td>
                     {it.soldPrice != null ? it.soldPrice?.toFixed(2) : "-"}
                   </td>
-                  <td>
+                  <td className="hstack" style={{ gap: 6 }}>
+                    <button className="btn" onClick={() => setEditItem(it)}>
+                      עריכה
+                    </button>
                     {!it.soldAt && (
                       <button className="btn" onClick={() => setSellOpen(it)}>
                         מכירה
@@ -101,6 +105,11 @@ export default function AccessoriesView() {
         </div>
       </section>
 
+      <EditAccessoryModal
+        item={editItem}
+        onClose={() => setEditItem(null)}
+        afterSave={load}
+      />
       <AddAccessoryModal
         open={addOpen}
         onClose={() => setAddOpen(false)}
@@ -250,6 +259,92 @@ function SellAccessoryModal({
           value={soldPrice}
           onChange={(e) => setSoldPrice(e.target.value)}
           placeholder={`${item.price?.toFixed(2)}`}
+        />
+      </Field>
+    </Modal>
+  );
+}
+
+function EditAccessoryModal({
+  item,
+  onClose,
+  afterSave,
+}: {
+  item: AccessoryItem | null;
+  onClose: () => void;
+  afterSave: () => void;
+}) {
+  const [type, setType] = useState("");
+  const [desc, setDesc] = useState("");
+  const [price, setPrice] = useState("");
+  const [sku, setSku] = useState("");
+
+  useEffect(() => {
+    setType(item?.type ?? "");
+    setDesc(item?.description ?? "");
+    setPrice(item ? String(item.price) : "");
+    setSku(item?.sku ?? "");
+  }, [item?.id]);
+
+  if (!item) return null;
+  return (
+    <Modal
+      title={`עריכת פריט: ${item.type}`}
+      open={!!item}
+      onClose={onClose}
+      footer={
+        <>
+          <button className="btn" onClick={onClose}>
+            ביטול
+          </button>
+          <button
+            className="btn gold"
+            onClick={async () => {
+              const p = Number(price);
+              if (!type || !desc || isNaN(p) || p < 0)
+                return alert("יש למלא: סוג, תיאור ומחיר ≥ 0");
+              await window.api.updateAccessory(item.id, {
+                type,
+                description: desc,
+                price: p,
+                sku: sku || null,
+              });
+              onClose();
+              afterSave();
+            }}
+          >
+            שמירה
+          </button>
+        </>
+      }
+    >
+      <Field label="סוג">
+        <input
+          className="input"
+          value={type}
+          onChange={(e) => setType(e.target.value)}
+        />
+      </Field>
+      <Field label="תיאור">
+        <input
+          className="input"
+          value={desc}
+          onChange={(e) => setDesc(e.target.value)}
+        />
+      </Field>
+      <Field label="מחיר">
+        <input
+          className="number"
+          inputMode="decimal"
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
+        />
+      </Field>
+      <Field label="בר-קוד (אופציונלי)">
+        <input
+          className="input"
+          value={sku}
+          onChange={(e) => setSku(e.target.value)}
         />
       </Field>
     </Modal>

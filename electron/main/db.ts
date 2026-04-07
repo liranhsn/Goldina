@@ -180,6 +180,46 @@ export class Db {
     trx();
   }
 
+  updateMetalTransaction(
+    id: string,
+    metal: Metal,
+    grams: number,
+    price: number,
+    note?: string
+  ) {
+    ensurePositiveGrams(grams);
+    const metalInt = toMetalTypeInt(metal);
+
+    const txRow = this.db
+      .prepare(
+        "SELECT MetalType, DeltaGrams FROM MetalTransaction WHERE Id = ?"
+      )
+      .get(id);
+    if (!txRow) throw new Error("העסקה לא נמצאה");
+    if (txRow.MetalType !== metalInt) throw new Error("סוג מתכת לא תואם");
+
+    // Preserve the original direction (buy = positive, sell = negative)
+    const newDelta = txRow.DeltaGrams >= 0 ? Math.abs(grams) : -Math.abs(grams);
+
+    const balRow = this.db
+      .prepare("SELECT TotalGrams FROM MetalBalance WHERE MetalType = ?")
+      .get(metalInt);
+    const current = (balRow?.TotalGrams as number) ?? 0;
+    const newTotal = current - txRow.DeltaGrams + newDelta;
+    if (newTotal < -1e-9) throw new Error("עדכון יגרום ליתרה שלילית. הפעולה נמנעה.");
+
+    this.db.transaction(() => {
+      this.db
+        .prepare("UPDATE MetalBalance SET TotalGrams = ? WHERE MetalType = ?")
+        .run(newTotal, metalInt);
+      this.db
+        .prepare(
+          "UPDATE MetalTransaction SET DeltaGrams = ?, Price = ?, Note = ? WHERE Id = ?"
+        )
+        .run(newDelta, price, note ?? null, id);
+    })();
+  }
+
   deleteMetalTransaction(id: string, metal: Metal) {
     const metalInt = toMetalTypeInt(metal);
 
@@ -247,6 +287,32 @@ export class Db {
         item.sku ?? null
       );
     return id;
+  }
+
+  updateAccessory(
+    id: string,
+    payload: {
+      type: string;
+      description: string;
+      price: number;
+      sku?: string | null;
+    }
+  ) {
+    if (!payload.type?.trim()) throw new Error("סוג נדרש");
+    if (!payload.description?.trim()) throw new Error("תיאור נדרש");
+    if (!(payload.price >= 0)) throw new Error("מחיר חייב להיות ≥ 0");
+    const info = this.db
+      .prepare(
+        "UPDATE AccessoryItem SET Type = ?, Description = ?, Price = ?, Sku = ? WHERE Id = ?"
+      )
+      .run(
+        payload.type.trim(),
+        payload.description.trim(),
+        payload.price,
+        payload.sku ?? null,
+        id
+      );
+    if (info.changes !== 1) throw new Error("עדכון נכשל");
   }
 
   sellAccessory(id: string, soldPrice?: number) {
@@ -409,6 +475,40 @@ export class Db {
       depositedAt?: string | null;
       clearedAt?: string | null;
     }>;
+  }
+
+  updateCheck(
+    id: string,
+    payload: {
+      bank: string;
+      number: string;
+      payee: string;
+      amount: number;
+      issueDateISO: string;
+      dueDateISO: string;
+      notes?: string;
+    }
+  ) {
+    if (!payload.number?.trim()) throw new Error("מספר צ׳ק נדרש");
+    if (!payload.payee?.trim()) throw new Error("מוטב נדרש");
+    if (!payload.bank?.trim()) throw new Error("בנק נדרש");
+    if (!(typeof payload.amount === "number" && payload.amount > 0))
+      throw new Error("סכום חייב להיות > 0");
+    const info = this.db
+      .prepare(
+        `UPDATE CheckItem SET Bank = ?, Number = ?, Payee = ?, Amount = ?, IssueDate = ?, DueDate = ?, Notes = ? WHERE Id = ?`
+      )
+      .run(
+        payload.bank.trim(),
+        payload.number.trim(),
+        payload.payee.trim(),
+        payload.amount,
+        payload.issueDateISO,
+        payload.dueDateISO,
+        payload.notes ?? null,
+        id
+      );
+    if (info.changes !== 1) throw new Error("עדכון נכשל");
   }
 
   updateCheckStatus(id: string, status: CheckStatus) {

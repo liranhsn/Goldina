@@ -5,12 +5,15 @@ import { resolve } from "node:path";
 export default defineConfig({
   main: {
     plugins: [externalizeDepsPlugin()],
+    define: {
+      "process.env.UPDATE_TOKEN": JSON.stringify(process.env.UPDATE_TOKEN ?? ""),
+    },
     build: {
       outDir: "dist-electron/main",
       rollupOptions: {
         input: { index: resolve(__dirname, "electron/main/index.ts") },
         output: { format: "es", entryFileNames: "index.js" },
-        external: ["better-sqlite3"],
+        external: ["better-sqlite3", "electron-updater"],
       },
       commonjsOptions: { ignoreDynamicRequires: true },
     },

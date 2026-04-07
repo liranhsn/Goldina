@@ -23,6 +23,7 @@ export default function ChecksView() {
   const [items, setItems] = useState<CheckItem[]>([]);
   const [search, setSearch] = useState("");
   const [openAdd, setOpenAdd] = useState(false);
+  const [editCheck, setEditCheck] = useState<CheckItem | null>(null);
   const [total, setTotal] = useState(0);
 
   // טווח תאריכים – ברירת מחדל: החודש הנוכחי
@@ -184,6 +185,9 @@ export default function ChecksView() {
                   </td>
                   <td>{c.notes ?? "-"}</td>
                   <td className="hstack" style={{ gap: 6 }}>
+                    <button className="btn" onClick={() => setEditCheck(c)}>
+                      עריכה
+                    </button>
                     {c.status === "issued" && (
                       <>
                         <button
@@ -264,6 +268,11 @@ export default function ChecksView() {
         open={openAdd}
         onClose={() => setOpenAdd(false)}
         afterAdd={load}
+      />
+      <EditCheckModal
+        item={editCheck}
+        onClose={() => setEditCheck(null)}
+        afterSave={load}
       />
     </>
   );
@@ -391,6 +400,128 @@ function AddCheckModal({
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="הערה פנימית"
+        />
+      </Field>
+    </Modal>
+  );
+}
+
+function EditCheckModal({
+  item,
+  onClose,
+  afterSave,
+}: {
+  item: CheckItem | null;
+  onClose: () => void;
+  afterSave: () => void;
+}) {
+  const [bank, setBank] = useState("");
+  const [number, setNumber] = useState("");
+  const [payee, setPayee] = useState("");
+  const [amount, setAmount] = useState("");
+  const [issueYMD, setIssueYMD] = useState("");
+  const [dueYMD, setDueYMD] = useState("");
+  const [notes, setNotes] = useState("");
+
+  useEffect(() => {
+    setBank(item?.bank ?? "");
+    setNumber(item?.number ?? "");
+    setPayee(item?.payee ?? "");
+    setAmount(item ? String(item.amount) : "");
+    setIssueYMD(item ? item.issueDate.slice(0, 10) : "");
+    setDueYMD(item ? item.dueDate.slice(0, 10) : "");
+    setNotes(item?.notes ?? "");
+  }, [item?.id]);
+
+  if (!item) return null;
+  return (
+    <Modal
+      title="עריכת צ׳ק"
+      open={!!item}
+      onClose={onClose}
+      footer={
+        <>
+          <button className="btn" onClick={onClose}>
+            ביטול
+          </button>
+          <button
+            className="btn gold"
+            onClick={async () => {
+              const amt = Number(amount);
+              if (!number.trim() || !payee.trim() || isNaN(amt) || amt <= 0) {
+                alert("יש למלא מספר, מוטב וסכום גדול מ־0");
+                return;
+              }
+              const issueISO = new Date(issueYMD + "T00:00:00").toISOString();
+              const dueISO = new Date(dueYMD + "T00:00:00").toISOString();
+              await window.api.updateCheck(item.id, {
+                bank: bank.trim(),
+                number: number.trim(),
+                payee: payee.trim(),
+                amount: amt,
+                issueDateISO: issueISO,
+                dueDateISO: dueISO,
+                notes: notes.trim() || undefined,
+              });
+              onClose();
+              afterSave();
+            }}
+          >
+            שמירה
+          </button>
+        </>
+      }
+    >
+      <Field label="בנק">
+        <input
+          className="input"
+          value={bank}
+          onChange={(e) => setBank(e.target.value)}
+        />
+      </Field>
+      <Field label="מס׳ צ׳ק">
+        <input
+          className="input"
+          value={number}
+          onChange={(e) => setNumber(e.target.value)}
+        />
+      </Field>
+      <Field label="מוטב">
+        <input
+          className="input"
+          value={payee}
+          onChange={(e) => setPayee(e.target.value)}
+        />
+      </Field>
+      <Field label="סכום">
+        <input
+          className="number"
+          inputMode="decimal"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+        />
+      </Field>
+      <Field label="תאריך הנפקה">
+        <input
+          type="date"
+          className="input"
+          value={issueYMD}
+          onChange={(e) => setIssueYMD(e.target.value)}
+        />
+      </Field>
+      <Field label="תאריך פירעון">
+        <input
+          type="date"
+          className="input"
+          value={dueYMD}
+          onChange={(e) => setDueYMD(e.target.value)}
+        />
+      </Field>
+      <Field label="הערות (אופציונלי)">
+        <input
+          className="input"
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
         />
       </Field>
     </Modal>

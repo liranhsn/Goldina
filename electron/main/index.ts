@@ -1,7 +1,11 @@
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain, dialog } from "electron";
 import path from "node:path";
+import { createRequire } from "node:module";
 import { db } from "./db.js";
 import type { Metal, AccessoryFilter } from "./types.js";
+
+const nodeRequire = createRequire(import.meta.url);
+const { autoUpdater } = nodeRequire("electron-updater");
 
 const ADMIN_PASSWORD = "2468";
 
@@ -38,7 +42,49 @@ async function createWindow() {
   });
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(async () => {
+  await createWindow();
+  if (app.isPackaged) {
+    setupAutoUpdater();
+  }
+});
+
+const GITHUB_OWNER = "liranhsn";
+const GITHUB_REPO = "Goldina";
+const UPDATE_TOKEN = process.env.UPDATE_TOKEN ?? "";
+
+function setupAutoUpdater() {
+  autoUpdater.setFeedURL({
+    provider: "github",
+    owner: GITHUB_OWNER,
+    repo: GITHUB_REPO,
+    private: true,
+    token: UPDATE_TOKEN,
+  });
+
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
+
+  autoUpdater.on("update-downloaded", () => {
+    const choice = dialog.showMessageBoxSync(win, {
+      type: "info",
+      title: "עדכון מוכן להתקנה",
+      message: "גרסה חדשה של Goldina הורדה.\nהאם להפעיל מחדש ולהתקין עכשיו?",
+      buttons: ["הפעל מחדש", "מאוחר יותר"],
+      defaultId: 0,
+      cancelId: 1,
+    });
+    if (choice === 0) {
+      autoUpdater.quitAndInstall();
+    }
+  });
+
+  autoUpdater.on("error", (err: Error) => {
+    console.error("Auto-updater error:", err);
+  });
+
+  autoUpdater.checkForUpdates();
+}
 
 ipcMain.handle("ping", async () => "pong");
 
@@ -76,6 +122,29 @@ ipcMain.handle(
 );
 
 ipcMain.handle(
+  "metal:update-tx",
+  (
+    _e,
+    payload: {
+      id: string;
+      metal: "gold" | "silver";
+      grams: number;
+      price: number;
+      note?: string;
+    }
+  ) => {
+    db.updateMetalTransaction(
+      payload.id,
+      payload.metal,
+      payload.grams,
+      payload.price,
+      payload.note
+    );
+    return db.getMetalDashboard(payload.metal);
+  }
+);
+
+ipcMain.handle(
   "metal:delete-tx",
   (_e, payload: { id: string; metal: "gold" | "silver" }) => {
     db.deleteMetalTransaction(payload.id, payload.metal);
@@ -93,6 +162,20 @@ ipcMain.handle(
     _e,
     item: { type: string; description: string; price: number; sku?: string }
   ) => db.addAccessory(item)
+);
+
+ipcMain.handle(
+  "acc:update",
+  (
+    _e,
+    payload: {
+      id: string;
+      type: string;
+      description: string;
+      price: number;
+      sku?: string | null;
+    }
+  ) => db.updateAccessory(payload.id, payload)
 );
 
 ipcMain.handle("acc:sell", (_e, payload: { id: string; soldPrice?: number }) =>
@@ -126,6 +209,23 @@ ipcMain.handle(
       notes?: string;
     }
   ) => db.addCheck(payload)
+);
+
+ipcMain.handle(
+  "checks:update",
+  (
+    _e,
+    payload: {
+      id: string;
+      bank: string;
+      number: string;
+      payee: string;
+      amount: number;
+      issueDateISO: string;
+      dueDateISO: string;
+      notes?: string;
+    }
+  ) => db.updateCheck(payload.id, payload)
 );
 
 ipcMain.handle(

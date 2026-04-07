@@ -30,6 +30,13 @@ declare global {
         price: number,
         note?: string
       ): Promise<DashboardDto>;
+      updateMetalTx(
+        id: string,
+        metal: Metal,
+        grams: number,
+        price: number,
+        note?: string
+      ): Promise<MetalDashboard>;
       deleteMetalTx(id: string, metal: Metal): Promise<MetalDashboard>;
       listAccessories(filter: AccessoryFilter): Promise<AccessoryItem[]>;
       addAccessory(item: {
@@ -38,6 +45,10 @@ declare global {
         price: number;
         sku?: string;
       }): Promise<string>;
+      updateAccessory(
+        id: string,
+        item: { type: string; description: string; price: number; sku?: string | null }
+      ): Promise<void>;
       sellAccessory(id: string, soldPrice?: number): Promise<void>;
 
       listChecks: (opts: {
@@ -55,6 +66,18 @@ declare global {
         dueDateISO: string;
         notes?: string;
       }) => Promise<any>;
+      updateCheck: (
+        id: string,
+        p: {
+          bank: string;
+          number: string;
+          payee: string;
+          amount: number;
+          issueDateISO: string;
+          dueDateISO: string;
+          notes?: string;
+        }
+      ) => Promise<void>;
       updateCheckStatus: (
         id: string,
         status: "issued" | "deposited" | "returned" | "cancelled"

@@ -20,6 +20,13 @@ contextBridge.exposeInMainWorld("api", {
     price: number,
     note?: string
   ) => ipcRenderer.invoke("metal:sell", { metal, grams, price, note }),
+  updateMetalTx: (
+    id: string,
+    metal: "gold" | "silver",
+    grams: number,
+    price: number,
+    note?: string
+  ) => ipcRenderer.invoke("metal:update-tx", { id, metal, grams, price, note }),
   deleteMetalTx: (id: string, metal: "gold" | "silver") =>
     ipcRenderer.invoke("metal:delete-tx", { id, metal }),
 
@@ -31,6 +38,10 @@ contextBridge.exposeInMainWorld("api", {
     price: number;
     sku?: string;
   }) => ipcRenderer.invoke("acc:add", item),
+  updateAccessory: (
+    id: string,
+    item: { type: string; description: string; price: number; sku?: string | null }
+  ) => ipcRenderer.invoke("acc:update", { id, ...item }),
   sellAccessory: (id: string, soldPrice?: number) =>
     ipcRenderer.invoke("acc:sell", { id, soldPrice }),
 
@@ -49,6 +60,18 @@ contextBridge.exposeInMainWorld("api", {
     dueDateISO: string;
     notes?: string;
   }) => ipcRenderer.invoke("checks:add", p),
+  updateCheck: (
+    id: string,
+    p: {
+      bank: string;
+      number: string;
+      payee: string;
+      amount: number;
+      issueDateISO: string;
+      dueDateISO: string;
+      notes?: string;
+    }
+  ) => ipcRenderer.invoke("checks:update", { id, ...p }),
   updateCheckStatus: (
     id: string,
     status: "issued" | "deposited" | "returned" | "cancelled"

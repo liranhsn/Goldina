@@ -13,6 +13,12 @@ export default function MetalView({ metal }: { metal: Metal }) {
   const [dash, setDash] = useState<MetalDashboard | null>(null);
   const [addOpen, setAddOpen] = useState(false);
   const [sellOpen, setSellOpen] = useState(false);
+  const [editTx, setEditTx] = useState<{
+    id: string;
+    deltaGrams: number;
+    price: number;
+    note?: string;
+  } | null>(null);
   const metalLabel = metal === "gold" ? "זהב" : "כסף";
 
   // --------- טווח תאריכים: ברירת מחדל = החודש הנוכחי ---------
@@ -129,7 +135,20 @@ export default function MetalView({ metal }: { metal: Metal }) {
                   </td>
                   <td>{tx.price}</td>
                   <td>{tx.note ?? "-"}</td>
-                  <td>
+                  <td className="hstack" style={{ gap: 6 }}>
+                    <button
+                      className="btn"
+                      onClick={() =>
+                        setEditTx({
+                          id: tx.id,
+                          deltaGrams: tx.deltaGrams,
+                          price: tx.price,
+                          note: tx.note ?? undefined,
+                        })
+                      }
+                    >
+                      עריכה
+                    </button>
                     <button
                       className="btn danger"
                       onClick={async () => {
@@ -165,6 +184,12 @@ export default function MetalView({ metal }: { metal: Metal }) {
         </div>
       </section>
 
+      <EditMetalTxModal
+        item={editTx}
+        metal={metal}
+        onClose={() => setEditTx(null)}
+        afterSave={(res) => setDash(res)}
+      />
       <AddSellModals
         metal={metal}
         addOpen={addOpen}
@@ -186,6 +211,94 @@ export default function MetalView({ metal }: { metal: Metal }) {
         currentBalance={dash?.totalGrams ?? 0}
       />
     </>
+  );
+}
+
+function EditMetalTxModal({
+  item,
+  metal,
+  onClose,
+  afterSave,
+}: {
+  item: { id: string; deltaGrams: number; price: number; note?: string } | null;
+  metal: Metal;
+  onClose: () => void;
+  afterSave: (dash: MetalDashboard) => void;
+}) {
+  const [grams, setGrams] = useState("");
+  const [price, setPrice] = useState("");
+  const [note, setNote] = useState("");
+
+  useEffect(() => {
+    setGrams(item ? Math.abs(item.deltaGrams).toFixed(3) : "");
+    setPrice(item ? String(item.price) : "");
+    setNote(item?.note ?? "");
+  }, [item?.id]);
+
+  if (!item) return null;
+  const isSell = item.deltaGrams < 0;
+  const metalLabel = METAL_LABEL[metal];
+
+  return (
+    <Modal
+      title={`עריכת ${isSell ? "מכירה" : "רכישה"} – ${metalLabel}`}
+      open={!!item}
+      onClose={onClose}
+      footer={
+        <>
+          <button className="btn" onClick={onClose}>
+            ביטול
+          </button>
+          <button
+            className="btn gold"
+            onClick={async () => {
+              const g = Number(grams);
+              const p = Number(price);
+              if (!g || g <= 0) return alert("כמות גרמים חייבת להיות > 0");
+              try {
+                const res = await window.api.updateMetalTx(
+                  item.id,
+                  metal,
+                  g,
+                  p,
+                  note || undefined
+                );
+                onClose();
+                afterSave(res);
+              } catch (e: any) {
+                alert(e.message ?? String(e));
+              }
+            }}
+          >
+            שמירה
+          </button>
+        </>
+      }
+    >
+      <Field label="גרמים">
+        <input
+          className="number"
+          inputMode="decimal"
+          value={grams}
+          onChange={(e) => setGrams(e.target.value)}
+        />
+      </Field>
+      <Field label="מחיר">
+        <input
+          className="number"
+          inputMode="decimal"
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
+        />
+      </Field>
+      <Field label="הערה (אופציונלי)">
+        <input
+          className="input"
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+        />
+      </Field>
+    </Modal>
   );
 }
 
