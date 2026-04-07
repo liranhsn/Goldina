@@ -344,17 +344,21 @@ function AddSellModals({
                 const price = Number(addPrice);
                 if (!grams || grams <= 0)
                   return alert("אנא הזן כמות גרמים גדולה מ־0");
-                await window.api.addMetal(
-                  metal,
-                  grams,
-                  price,
-                  addNote || undefined
-                );
-                onCloseAdd();
-                setAddGrams("");
-                setAddPrice("");
-                setAddNote("");
-                afterChange();
+                try {
+                  await window.api.addMetal(
+                    metal,
+                    grams,
+                    price,
+                    addNote || undefined
+                  );
+                  onCloseAdd();
+                  setAddGrams("");
+                  setAddPrice("");
+                  setAddNote("");
+                  afterChange();
+                } catch (e: any) {
+                  alert("שגיאה: " + (e.message ?? String(e)));
+                }
               }}
             >
               שמירה
@@ -408,17 +412,21 @@ function AddSellModals({
                   return alert("אנא הזן כמות גרמים גדולה מ־0");
                 if (grams > currentBalance)
                   return alert("לא ניתן למכור יותר מהיתרה הקיימת.");
-                await window.api.sellMetal(
-                  metal,
-                  grams,
-                  price,
-                  sellNote || undefined
-                );
-                onCloseSell();
-                setSellGrams("");
-                setAddPrice("");
-                setSellNote("");
-                afterChange();
+                try {
+                  await window.api.sellMetal(
+                    metal,
+                    grams,
+                    price,
+                    sellNote || undefined
+                  );
+                  onCloseSell();
+                  setSellGrams("");
+                  setAddPrice("");
+                  setSellNote("");
+                  afterChange();
+                } catch (e: any) {
+                  alert("שגיאה: " + (e.message ?? String(e)));
+                }
               }}
             >
               מכירה
