@@ -34,67 +34,79 @@ export class Db {
   }
 
   private migrate() {
-    this.db.exec(`
-      CREATE TABLE IF NOT EXISTS MetalBalance (
-        Id TEXT PRIMARY KEY,
-        MetalType INTEGER NOT NULL UNIQUE,
-        TotalGrams REAL NOT NULL DEFAULT 0
-      );
+    const version = this.db.pragma("user_version", { simple: true }) as number;
 
-  
-      CREATE TABLE IF NOT EXISTS MetalTransaction (
-        Id TEXT PRIMARY KEY,
-        MetalType INTEGER NOT NULL,
-        DeltaGrams REAL NOT NULL,
-        Price INTEGER NOT NULL,
-        Note TEXT,
-        At TEXT NOT NULL
-      );
+    if (version < 1) {
+      this.db.exec(`
+        CREATE TABLE IF NOT EXISTS MetalBalance (
+          Id TEXT PRIMARY KEY,
+          MetalType INTEGER NOT NULL UNIQUE,
+          TotalGrams REAL NOT NULL DEFAULT 0
+        );
 
-      CREATE INDEX IF NOT EXISTS IX_MetalTransaction_MetalType_At
-        ON MetalTransaction (MetalType, At DESC);
+        CREATE TABLE IF NOT EXISTS MetalTransaction (
+          Id TEXT PRIMARY KEY,
+          MetalType INTEGER NOT NULL,
+          DeltaGrams REAL NOT NULL,
+          Note TEXT,
+          At TEXT NOT NULL
+        );
 
-      CREATE TABLE IF NOT EXISTS AccessoryItem (
-        Id TEXT PRIMARY KEY,
-        Type TEXT NOT NULL,
-        Description TEXT NOT NULL,
-        Price REAL NOT NULL,
-        AddedAt TEXT NOT NULL,
-        SoldAt TEXT NULL,
-        SoldPrice REAL NULL,
-        Sku TEXT NULL
-      );
+        CREATE INDEX IF NOT EXISTS IX_MetalTransaction_MetalType_At
+          ON MetalTransaction (MetalType, At DESC);
 
-     
-      CREATE TABLE IF NOT EXISTS CheckItem (
-      Id TEXT PRIMARY KEY,
-      Bank TEXT NOT NULL,
-      Number TEXT NOT NULL,
-      Payee TEXT NOT NULL,
-      Amount REAL NOT NULL,
-      IssueDate TEXT NOT NULL,  -- ISO8601
-      DueDate TEXT NOT NULL,    -- ISO8601
-      Status INTEGER NOT NULL,  -- 1=Issued, 2=Deposited, 3=Returned, 4=Cancelled
-      Notes TEXT,
-      DepositedAt TEXT,
-      ClearedAt TEXT
-    );
+        CREATE TABLE IF NOT EXISTS AccessoryItem (
+          Id TEXT PRIMARY KEY,
+          Type TEXT NOT NULL,
+          Description TEXT NOT NULL,
+          Price REAL NOT NULL,
+          AddedAt TEXT NOT NULL,
+          SoldAt TEXT NULL,
+          SoldPrice REAL NULL,
+          Sku TEXT NULL
+        );
 
+        CREATE TABLE IF NOT EXISTS CheckItem (
+          Id TEXT PRIMARY KEY,
+          Bank TEXT NOT NULL,
+          Number TEXT NOT NULL,
+          Payee TEXT NOT NULL,
+          Amount REAL NOT NULL,
+          IssueDate TEXT NOT NULL,
+          DueDate TEXT NOT NULL,
+          Status INTEGER NOT NULL,
+          Notes TEXT,
+          DepositedAt TEXT,
+          ClearedAt TEXT
+        );
 
-    CREATE TABLE IF NOT EXISTS FixedExpense (
-    Id TEXT PRIMARY KEY,
-    Name TEXT NOT NULL,
-    Price REAL NOT NULL,
-    CreatedAt TEXT NOT NULL
-    );
+        CREATE TABLE IF NOT EXISTS FixedExpense (
+          Id TEXT PRIMARY KEY,
+          Name TEXT NOT NULL,
+          Price REAL NOT NULL,
+          CreatedAt TEXT NOT NULL
+        );
 
-    CREATE INDEX IF NOT EXISTS IX_CheckItem_DueDate ON CheckItem(DueDate);
-    CREATE INDEX IF NOT EXISTS IX_CheckItem_Status ON CheckItem(Status);
-    CREATE INDEX IF NOT EXISTS IX_AccessoryItem_SoldAt ON AccessoryItem (SoldAt);
-    CREATE INDEX IF NOT EXISTS IX_AccessoryItem_Type_SoldAt ON AccessoryItem (Type, SoldAt);
-    CREATE INDEX IF NOT EXISTS IX_FixedExpense_Name ON FixedExpense(Name);
+        CREATE INDEX IF NOT EXISTS IX_CheckItem_DueDate ON CheckItem(DueDate);
+        CREATE INDEX IF NOT EXISTS IX_CheckItem_Status ON CheckItem(Status);
+        CREATE INDEX IF NOT EXISTS IX_AccessoryItem_SoldAt ON AccessoryItem (SoldAt);
+        CREATE INDEX IF NOT EXISTS IX_AccessoryItem_Type_SoldAt ON AccessoryItem (Type, SoldAt);
+        CREATE INDEX IF NOT EXISTS IX_FixedExpense_Name ON FixedExpense(Name);
+      `);
+      this.db.pragma("user_version = 1");
+    }
 
-    `);
+    if (version < 2) {
+      // Add Price column to MetalTransaction (was missing in initial schema)
+      try {
+        this.db.exec("ALTER TABLE MetalTransaction ADD COLUMN Price INTEGER NOT NULL DEFAULT 0");
+      } catch { /* already exists on fresh installs */ }
+      this.db.pragma("user_version = 2");
+    }
+
+    // To add future schema changes, append:
+    // if (version < 3) { this.db.exec("ALTER TABLE ..."); this.db.pragma("user_version = 3"); }
+
     const row = this.db.prepare("SELECT COUNT(*) AS c FROM MetalBalance").get();
     const count = row ? (row.c as number) : 0;
     if (count === 0) {
