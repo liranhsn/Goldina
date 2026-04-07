@@ -35,14 +35,14 @@
   "build": {
     "appId": "com.yourcompany.goldina",
     "productName": "Goldina",
-    "icon": "src/assets/images/logo.png",
+    "icon": "build/icon.png",
     "files": [
       "dist/**",
       "dist-electron/**",
       "package.json"
     ],
     "extraResources": [
-      { "from": "src/assets/images/logo.png", "to": "logo.png" }
+      { "from": "build/icon.png", "to": "logo.png" }
     ],
     "asarUnpack": [
       "node_modules/better-sqlite3/**/*"
@@ -51,7 +51,7 @@
       "target": [
         "nsis"
       ],
-      "icon": "src/assets/images/logo.png",
+      "icon": "build/icon.png",
       "artifactName": "Goldina-Setup-${version}.exe"
     },
     "publish": {
