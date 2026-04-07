@@ -14,7 +14,7 @@ let win: BrowserWindow;
 function iconPath() {
   return app.isPackaged
     ? path.join(process.resourcesPath, "logo.ico")
-    : path.join(process.cwd(), "build", "icons", "logo.ico");
+    : path.join(process.cwd(), "src", "assets", "images", "logo.ico");
 }
 
 async function createWindow() {
