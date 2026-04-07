@@ -5,7 +5,7 @@
   "type": "module",
   "main": "dist-electron/main/index.js",
   "scripts": {
-    "postinstall": "node scripts/install-app-deps.js",
+    "postinstall": "node scripts/install-app-deps.js && node scripts/rename-electron.js",
     "dev": "electron-vite dev",
     "build": "electron-vite build",
     "build:win": "electron-builder --win",
@@ -35,14 +35,14 @@
   "build": {
     "appId": "com.yourcompany.goldina",
     "productName": "Goldina",
-    "icon": "src/assets/images/logo.ico",
+    "icon": "src/assets/images/logo.png",
     "files": [
       "dist/**",
       "dist-electron/**",
       "package.json"
     ],
     "extraResources": [
-      { "from": "src/assets/images/logo.ico", "to": "logo.ico" }
+      { "from": "src/assets/images/logo.png", "to": "logo.png" }
     ],
     "asarUnpack": [
       "node_modules/better-sqlite3/**/*"
@@ -51,7 +51,7 @@
       "target": [
         "nsis"
       ],
-      "icon": "src/assets/images/logo.ico",
+      "icon": "src/assets/images/logo.png",
       "artifactName": "Goldina-Setup-${version}.exe"
     },
     "publish": {

@@ -12,9 +12,18 @@ const ADMIN_PASSWORD = "2468";
 let win: BrowserWindow;
 
 function iconPath() {
-  return app.isPackaged
+  if (app.isPackaged) return path.join(process.resourcesPath, "logo.png");
+  return path.join(process.cwd(), "src", "assets", "images", "logo.png");
+}
+
+function setAppIcon() {
+  const ext = process.platform === "darwin" ? "png" : "ico";
+  const icon = app.isPackaged
     ? path.join(process.resourcesPath, "logo.ico")
-    : path.join(process.cwd(), "src", "assets", "images", "logo.ico");
+    : path.join(process.cwd(), "src", "assets", "images", `logo.${ext}`);
+  if (process.platform === "darwin") {
+    app.dock.setIcon(icon);
+  }
 }
 
 async function createWindow() {
@@ -42,7 +51,10 @@ async function createWindow() {
   });
 }
 
+app.setName("Goldina");
+
 app.whenReady().then(async () => {
+  setAppIcon();
   await createWindow();
   if (app.isPackaged) {
     setupAutoUpdater();
