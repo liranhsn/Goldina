@@ -1,6 +1,6 @@
 {
   "name": "inventory-electron",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "private": true,
   "type": "module",
   "main": "dist-electron/main/index.js",
@@ -42,7 +42,10 @@
       "package.json"
     ],
     "extraResources": [
-      { "from": "build/icon.png", "to": "logo.png" }
+      {
+        "from": "build/icon.png",
+        "to": "logo.png"
+      }
     ],
     "asarUnpack": [
       "node_modules/better-sqlite3/**/*"
