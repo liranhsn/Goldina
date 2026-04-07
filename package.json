@@ -5,7 +5,7 @@
   "type": "module",
   "main": "dist-electron/main/index.js",
   "scripts": {
-    "postinstall": "node scripts/install-app-deps.js && node scripts/rename-electron.js",
+    "postinstall": "node scripts/install-app-deps.js",
     "dev": "electron-vite dev",
     "build": "electron-vite build",
     "build:win": "electron-builder --win",
